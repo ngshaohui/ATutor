@@ -1,9 +1,12 @@
-FROM php:5.4-apache
+FROM php:5.6-apache
 
 COPY ATutor-2.2.1.tar.gz /tmp
 # use strip components to remove outermost ATutor folder
 # /var/www/html/ATutor/index.php becomes /var/www/html/index.php
 RUN tar -xzf /tmp/ATutor-2.2.1.tar.gz -C /var/www/html/ --strip-components=1
+
+# IDK WHY ANDREA PLS
+RUN sed -i '96s/defined/!defined/' /var/www/html/include/lib/mysql_connect.inc.php
 
 # cleanup
 RUN rm /tmp/ATutor-2.2.1.tar.gz
@@ -17,9 +20,10 @@ RUN echo "deb http://archive.debian.org/debian jessie main" >> /etc/apt/sources.
 # need to install the following to install the gd extension
 # libfreetype-dev omitted since it can no longer be found
 # don't think that --with-jpeg flag is working, but ATutor only shows a warning so will not bother fixing
-RUN apt-get update && apt-get install -y --allow-unauthenticated \
+RUN apt-get update && apt-get install -y --allow-unauthenticated --allow-downgrades \
 		# libfreetype-dev \
 		libjpeg62-turbo-dev \
+		zlib1g=1:1.2.8.dfsg-2+deb8u1 \
 		libpng-dev \
 	&& docker-php-ext-configure gd --with-freetype --with-jpeg
 
